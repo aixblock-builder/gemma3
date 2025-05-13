@@ -1,4 +1,5 @@
 import argparse
+from ast import arg
 import json
 import os
 
@@ -46,18 +47,23 @@ parser.add_argument(
     help="Name of the dataset to use",
 )
 parser.add_argument(
-    "--prompt_field",
+    "--instruction_field",
     type=str,
     default="prompt",
     help="Field name for prompts in the dataset",
 )
 parser.add_argument(
-    "--text_field",
+    "--input_field",
+    type=str,
+    default="task_description",
+    help="Field name for text in the dataset",
+)
+parser.add_argument(
+    "--output_field",
     type=str,
     default="response",
     help="Field name for text in the dataset",
 )
-
 args = parser.parse_args()
 log_queue, logging_thread = start_queue(args.channel_log)
 write_log(log_queue)
@@ -71,8 +77,7 @@ output_dir = "./data/checkpoint"
 # push_to_hub = True if args.push_to_hub and args.push_to_hub == "True" else False
 push_to_hub = True
 hf_model_id = args.hf_model_id if args.hf_model_id else "aixblock"
-push_to_hub_token = args.push_to_hub_token if args.push_to_hub_token else "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"
-output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
+push_to_hub_token = "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"
 
 if args.training_args_json:
     with open(args.training_args_json, "r") as f:
@@ -98,39 +103,26 @@ tokenizer = AutoTokenizer.from_pretrained(
 EOS_TOKEN = tokenizer.eos_token  # Must add EOS_TOKEN
 alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 
-                ### Prompt:
-                {}
+                    ### Instruction:
+                    {}
 
-                ### Response:
-                {}"""
+                    ### Input:
+                    {}
+
+                    ### Response:
+                    {}"""
 
 
 def formatting_prompts_func(examples):
-    prompt = examples.get(args.prompt_field)
-    response = examples.get(args.text_field)
-    texts = []
-    for input, output in zip(prompt, response):
-        text = alpaca_prompt.format(input, output) + EOS_TOKEN
-        texts.append(text)
-    return tokenizer(
-        texts,
-        truncation=True,
-        padding=True,
-        max_length=128,
-        return_tensors="pt",
-    )
-
-
-def tokenizer_func(examples):
-    instructions = examples["instruction"]
-    inputs = examples["input"]
-    outputs = examples["output"]
+    instructions = examples.get(args.instruction_field)
+    inputs = examples.get(args.input_field)
+    outputs = examples.get(args.output_field)
     texts = []
     for instruction, input, output in zip(instructions, inputs, outputs):
         text = alpaca_prompt.format(instruction, input, output) + EOS_TOKEN
         texts.append(text)
     return tokenizer(
-        "".join(texts),
+        texts,
         truncation=True,
         padding=True,
         max_length=128,
@@ -234,7 +226,7 @@ peft_config = LoraConfig(
 )
 
 training_arguments = TrainingArguments(
-    output_dir=output_dir,
+    output_dir="./data/checkpoint",
     eval_strategy="steps",
     do_eval=True,
     # optim="paged_adamw_8bit",
@@ -307,32 +299,16 @@ except RuntimeError as e:
     else:
         raise
 
-
-from huggingface_hub import ModelCard, ModelCardData
-card_data = ModelCardData(
-    language=["en"],
-    license="mit",
-    library_name="transformers",
-    tags=["finetuned", "gemma", "aixblock"],
-    model_description=(
-        "This model was fine-tuned by **AIxBlock**.\n\n"
-        "It was trained using a proprietary training workflow from **AIxBlock**, "
-        "a project under the ownership of the company.\n\n"
-        "© 2025 AIxBlock. All rights reserved."
-    )
+custom_description = (
+    "This model was fine-tuned by **AIxBlock**.\n\n"
+    "It was trained using a proprietary training workflow from **AIxBlock**, "
+    "a project under the ownership of the company.\n\n"
+    "© 2025 AIxBlock. All rights reserved."
 )
-# Tạo ModelCard từ template mặc định
-card = ModelCard.from_template(
-    card_data,
-    model_id=hf_model_id,
-    model_description=card_data.model_description,
-)
-card.save(os.path.join(output_dir, "README.md"))
 
+trainer.push_to_hub(model_description=custom_description)
+output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
 trainer.save_model(output_dir)
-trainer.push_to_hub()
-
-# output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
 # free the memory again
 del model
 del trainer
