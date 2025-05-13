@@ -306,47 +306,28 @@ except RuntimeError as e:
     else:
         raise
 
-output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
-readme_path = os.path.join(output_dir, "README.md")
-os.makedirs(output_dir, exist_ok=True)
+readme_path = os.path.join("./data/checkpoint", "README.md")
 
+# Đọc nội dung README.md mặc định
+with open(readme_path, "r") as f:
+    readme_content = f.read()
+
+# Xác định phần Citations và thay thế nó bằng nội dung bạn muốn
+new_citations = """
+## Citations
+
+This model was trained using the workflow from AIxBlock, a company specializing in AI solutions. 
+
+For more information about AIxBlock, please visit our website.
+
+"""
+
+# Thay thế phần Citations trong README.md
+readme_content = readme_content.replace("## Citations\n", new_citations)
+
+# Ghi lại nội dung đã chỉnh sửa vào README.md
 with open(readme_path, "w") as f:
-#     f.write(
-#         "# Model by AIxBlock\n\n"
-#         "This model was trained from a proprietary workflow owned by AIxBlock.\n\n"
-#         "Please contact us for licensing or usage inquiries.\n"
-#     )
-# with open(readme_path, "w") as f:
-    f.write(
-        """
----
-license: proprietary
-tags:
-- fine-tuned
-- aixblock
-- sft
----
-
-# Fine-tuned Language Model by AIxBlock
-
-**© 2025 AIxBlock. All rights reserved.**
-
-This model was fine-tuned using a proprietary training workflow developed by **AIxBlock**.  
-It is intended for internal use and evaluation purposes only.
-
-## Description
-
-The model was trained using structured workflows optimized for large-scale natural language processing tasks, including supervised fine-tuning (SFT) pipelines.
-
-## License
-
-This model is licensed under **proprietary terms**. Any use, reproduction, or distribution is strictly prohibited without prior written permission from AIxBlock.
-
-## Contact
-
-For inquiries, contact: contact@aixblock.com
-        """.strip()
-    )
+    f.write(readme_content)
 
 trainer.push_to_hub()
 
