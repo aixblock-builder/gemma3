@@ -306,8 +306,17 @@ except RuntimeError as e:
     else:
         raise
 
-readme_path = os.path.join(training_arguments.output_dir, "README.md")
+output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
+readme_path = os.path.join(output_dir, "README.md")
+os.makedirs(output_dir, exist_ok=True)
+
 with open(readme_path, "w") as f:
+#     f.write(
+#         "# Model by AIxBlock\n\n"
+#         "This model was trained from a proprietary workflow owned by AIxBlock.\n\n"
+#         "Please contact us for licensing or usage inquiries.\n"
+#     )
+# with open(readme_path, "w") as f:
     f.write(
         """
 ---
