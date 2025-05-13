@@ -308,26 +308,23 @@ except RuntimeError as e:
 
 readme_path = os.path.join("./data/checkpoint", "README.md")
 
-# Đọc nội dung README.md mặc định
-with open(readme_path, "r") as f:
-    readme_content = f.read()
-
-# Xác định phần Citations và thay thế nó bằng nội dung bạn muốn
-new_citations = """
+citations = """
 ## Citations
 
-This model was trained using the workflow from AIxBlock, a company specializing in AI solutions. 
+This model was trained using the workflow from AIxBlock, a company specializing in AI solutions.
 
 For more information about AIxBlock, please visit our website.
-
 """
 
-# Thay thế phần Citations trong README.md
-readme_content = readme_content.replace("## Citations\n", new_citations)
+if os.path.exists(readme_path):
+    with open(readme_path, "r") as f:
+        content = f.read()
+    content = re.sub(r"## Citations[\s\S]+", citations, content) if "## Citations" in content else content + "\n" + citations
+else:
+    content = "# Model Card\n" + citations
 
-# Ghi lại nội dung đã chỉnh sửa vào README.md
 with open(readme_path, "w") as f:
-    f.write(readme_content)
+    f.write(content)
 
 trainer.push_to_hub()
 
