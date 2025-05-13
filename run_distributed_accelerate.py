@@ -309,19 +309,26 @@ except RuntimeError as e:
 
 
 from huggingface_hub import ModelCardData
-model_card = ModelCardData(
-    license="mit",  # hoặc "apache-2.0", "cc-by-4.0",...
-    tags=["gemma", "sft", "aixblock", "finetuned"],
-    language="en",
-    description=(
+card_data = ModelCardData(
+    language=["en"],
+    license="mit",
+    library_name="transformers",
+    tags=["finetuned", "gemma", "aixblock"],
+    model_description=(
         "This model was fine-tuned by **AIxBlock**.\n\n"
         "It was trained using a proprietary training workflow from **AIxBlock**, "
         "a project under the ownership of the company.\n\n"
         "© 2025 AIxBlock. All rights reserved."
-    ),
+    )
 )
+# Tạo ModelCard từ template mặc định
+card = ModelCard.from_template(
+    card_data,
+    model_id=hf_model_id,
+    model_description=card_data.model_description,
+)
+card.save(os.path.join(output_dir, "README.md"))
 
-trainer.create_model_card(model_card_data=model_card)
 trainer.push_to_hub()
 
 # output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
