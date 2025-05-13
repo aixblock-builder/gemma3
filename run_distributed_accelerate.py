@@ -78,8 +78,6 @@ output_dir = "./data/checkpoint"
 push_to_hub = True
 hf_model_id = args.hf_model_id if args.hf_model_id else "aixblock"
 push_to_hub_token = args.push_to_hub_token if args.push_to_hub_token else "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"
-output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
-
 print("Giá trị =============== ", push_to_hub_token)
 # push_to_hub_token = "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"
 
@@ -230,7 +228,7 @@ peft_config = LoraConfig(
 )
 
 training_arguments = TrainingArguments(
-    output_dir=output_dir,
+    output_dir="./data/checkpoint",
     eval_strategy="steps",
     do_eval=True,
     # optim="paged_adamw_8bit",
@@ -309,7 +307,7 @@ try:
     from huggingface_hub import whoami, ModelCard, ModelCardData, upload_file
     user = whoami(token=push_to_hub_token)['name']
     repo_id = f"{user}/{hf_model_id}"
-    print("======", repo_id)
+    logger.info(f"repo_id: {device}")
     card = ModelCard.load(repo_id)
     sections = card.text.split("## ")
 
@@ -341,11 +339,12 @@ try:
         commit_message="Update citation to AIxBlock format"
     )
 
-    print("✅ README.md đã được cập nhật.")
-except Exception as e:
-    print("=============")
-    print(e)
+    logger.info("✅ README.md đã được cập nhật.")
 
+except Exception as e:
+    logger.info(f"Fail {e}")
+
+output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
 trainer.save_model(output_dir)
 # free the memory again
 del model
