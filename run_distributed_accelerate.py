@@ -72,6 +72,7 @@ output_dir = "./data/checkpoint"
 push_to_hub = True
 hf_model_id = args.hf_model_id if args.hf_model_id else "aixblock"
 push_to_hub_token = args.push_to_hub_token if args.push_to_hub_token else "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"
+output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
 
 if args.training_args_json:
     with open(args.training_args_json, "r") as f:
@@ -233,7 +234,7 @@ peft_config = LoraConfig(
 )
 
 training_arguments = TrainingArguments(
-    output_dir="./data/checkpoint",
+    output_dir=output_dir,
     eval_strategy="steps",
     do_eval=True,
     # optim="paged_adamw_8bit",
@@ -306,29 +307,51 @@ except RuntimeError as e:
     else:
         raise
 
-readme_path = os.path.join("./data/checkpoint", "README.md")
 
-citations = """
-## Citations
-
-This model was trained using the workflow from AIxBlock, a company specializing in AI solutions.
-
-For more information about AIxBlock, please visit our website.
-"""
-
-if os.path.exists(readme_path):
-    with open(readme_path, "r") as f:
-        content = f.read()
-    content = re.sub(r"## Citations[\s\S]+", citations, content) if "## Citations" in content else content + "\n" + citations
-else:
-    content = "# Model Card\n" + citations
+readme_path = os.path.join(output_dir, "README.md")
+os.makedirs(output_dir, exist_ok=True)
 
 with open(readme_path, "w") as f:
-    f.write(content)
+#     f.write(
+#         "# Model by AIxBlock\n\n"
+#         "This model was trained from a proprietary workflow owned by AIxBlock.\n\n"
+#         "Please contact us for licensing or usage inquiries.\n"
+#     )
+# with open(readme_path, "w") as f:
+    f.write(
+        """
+---
+license: proprietary
+tags:
+- fine-tuned
+- aixblock
+- sft
+---
+
+# Fine-tuned Language Model by AIxBlock
+
+**© 2025 AIxBlock. All rights reserved.**
+
+This model was fine-tuned using a proprietary training workflow developed by **AIxBlock**.  
+It is intended for internal use and evaluation purposes only.
+
+## Description
+
+The model was trained using structured workflows optimized for large-scale natural language processing tasks, including supervised fine-tuning (SFT) pipelines.
+
+## License
+
+This model is licensed under **proprietary terms**. Any use, reproduction, or distribution is strictly prohibited without prior written permission from AIxBlock.
+
+## Contact
+
+For inquiries, contact: contact@aixblock.com
+        """.strip()
+    )
 
 trainer.push_to_hub()
 
-output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
+# output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
 trainer.save_model(output_dir)
 # free the memory again
 del model
