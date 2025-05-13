@@ -308,7 +308,7 @@ except RuntimeError as e:
         raise
 
 
-from huggingface_hub import ModelCardData
+from huggingface_hub import ModelCard, ModelCardData
 card_data = ModelCardData(
     language=["en"],
     license="mit",
