@@ -306,7 +306,41 @@ except RuntimeError as e:
     else:
         raise
 
+readme_path = os.path.join(training_arguments.output_dir, "README.md")
+with open(readme_path, "w") as f:
+    f.write(
+        """
+---
+license: proprietary
+tags:
+- fine-tuned
+- aixblock
+- sft
+---
+
+# Fine-tuned Language Model by AIxBlock
+
+**© 2025 AIxBlock. All rights reserved.**
+
+This model was fine-tuned using a proprietary training workflow developed by **AIxBlock**.  
+It is intended for internal use and evaluation purposes only.
+
+## Description
+
+The model was trained using structured workflows optimized for large-scale natural language processing tasks, including supervised fine-tuning (SFT) pipelines.
+
+## License
+
+This model is licensed under **proprietary terms**. Any use, reproduction, or distribution is strictly prohibited without prior written permission from AIxBlock.
+
+## Contact
+
+For inquiries, contact: contact@aixblock.com
+        """.strip()
+    )
+
 trainer.push_to_hub()
+
 output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
 trainer.save_model(output_dir)
 # free the memory again
