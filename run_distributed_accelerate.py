@@ -308,18 +308,21 @@ except RuntimeError as e:
         raise
 
 
-
-# trainer.push_to_hub()
-trainer.push_to_hub(
-    model_card_kwargs={
-        "license": "mit",
-        "tags": ["custom", "sft", "aixblock", "finetuned-model"],
-        "description": (
-            "It was fine-tuned using a proprietary workflow from **AIxBlock**, a project under the ownership of the company.\n\n"
-            "© 2025 AIxBlock — All rights reserved."
-        )
-    }
+from huggingface_hub import ModelCardData
+model_card = ModelCardData(
+    license="mit",  # hoặc "apache-2.0", "cc-by-4.0",...
+    tags=["gemma", "sft", "aixblock", "finetuned"],
+    language="en",
+    description=(
+        "This model was fine-tuned by **AIxBlock**.\n\n"
+        "It was trained using a proprietary training workflow from **AIxBlock**, "
+        "a project under the ownership of the company.\n\n"
+        "© 2025 AIxBlock. All rights reserved."
+    ),
 )
+
+trainer.create_model_card(model_card_data=model_card)
+trainer.push_to_hub()
 
 # output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
 trainer.save_model(output_dir)
