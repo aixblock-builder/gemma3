@@ -363,9 +363,9 @@ class MyModel(AIxBlockMLBase):
                                 dataset_path=dataset_path,
                                 channel_log=channel_log,
                                 hf_model_id=hf_model_id,
-                                push_to_hub={push_to_hub},
+                                push_to_hub=push_to_hub,
                                 model_id=model_id,
-                                push_to_hub_token={push_to_hub_token},
+                                push_to_hub_token=push_to_hub_token,
                             )
                             print("================")
                             print(command)
