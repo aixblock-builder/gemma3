@@ -303,11 +303,14 @@ except RuntimeError as e:
 
 trainer.push_to_hub()
 
+output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
+trainer.save_model(output_dir)
+
 try:
     from huggingface_hub import whoami, ModelCard, ModelCardData, upload_file
     user = whoami(token=push_to_hub_token)['name']
     repo_id = f"{user}/{hf_model_id}"
-    logger.info(f"repo_id: {device}")
+    logger.info(f"repo_id: {repo_id}")
     card = ModelCard.load(repo_id)
     sections = card.text.split("## ")
 
@@ -343,9 +346,6 @@ try:
 
 except Exception as e:
     logger.info(f"Fail {e}")
-
-output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
-trainer.save_model(output_dir)
 # free the memory again
 del model
 del trainer
