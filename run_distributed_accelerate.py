@@ -245,11 +245,11 @@ training_arguments = TrainingArguments(
     warmup_ratio=0.1,
     lr_scheduler_type="linear",
     remove_unused_columns=False,
-    report_to="tensorboard",  # azure_ml, comet_ml, mlflow, neptune, tensorboard, wandb, codecarbon, clearml, dagshub, flyte, dvclive
-    push_to_hub=push_to_hub,
+    report_to="tensorboard", #azure_ml, comet_ml, mlflow, neptune, tensorboard, wandb, codecarbon, clearml, dagshub, flyte, dvclive
+    push_to_hub = push_to_hub,
+    push_to_hub_model_id=hf_model_id,#[project-id]-[model-name]-[datetime]
     push_to_hub_token=push_to_hub_token,
-    no_cuda=False,
-    push_to_hub_model_id=hf_model_id,
+    no_cuda=False
 )
 
 trainer = SFTTrainer(
