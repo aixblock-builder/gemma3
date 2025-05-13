@@ -307,6 +307,7 @@ try:
     from huggingface_hub import whoami, ModelCard, ModelCardData, upload_file
     user = whoami(token=push_to_hub_token)['name']
     repo_id = f"{user}/{hf_model_id}"
+    print("======", repo_id)
     card = ModelCard.load(repo_id)
     sections = card.text.split("## ")
 
@@ -340,6 +341,7 @@ try:
 
     print("✅ README.md đã được cập nhật.")
 except Exception as e:
+    print("=============")
     print(e)
 
 output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
