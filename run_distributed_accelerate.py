@@ -329,10 +329,10 @@ card = ModelCard.from_template(
 )
 card.save(os.path.join(output_dir, "README.md"))
 
+trainer.save_model(output_dir)
 trainer.push_to_hub()
 
 # output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
-trainer.save_model(output_dir)
 # free the memory again
 del model
 del trainer
