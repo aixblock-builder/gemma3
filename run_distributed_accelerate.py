@@ -299,14 +299,7 @@ except RuntimeError as e:
     else:
         raise
 
-custom_description = (
-    "This model was fine-tuned by **AIxBlock**.\n\n"
-    "It was trained using a proprietary training workflow from **AIxBlock**, "
-    "a project under the ownership of the company.\n\n"
-    "© 2025 AIxBlock. All rights reserved."
-)
-
-trainer.push_to_hub(model_description=custom_description)
+trainer.push_to_hub()
 
 from huggingface_hub import whoami, ModelCard, ModelCardData, upload_file
 user = whoami(token=push_to_hub_token)['name']
