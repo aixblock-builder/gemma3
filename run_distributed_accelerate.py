@@ -78,6 +78,8 @@ output_dir = "./data/checkpoint"
 push_to_hub = True
 hf_model_id = args.hf_model_id if args.hf_model_id else "aixblock"
 push_to_hub_token = args.push_to_hub_token if args.push_to_hub_token else "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"
+output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
+
 print("Giá trị =============== ", push_to_hub_token)
 # push_to_hub_token = "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"
 
@@ -228,7 +230,7 @@ peft_config = LoraConfig(
 )
 
 training_arguments = TrainingArguments(
-    output_dir="./data/checkpoint",
+    output_dir=output_dir,
     eval_strategy="steps",
     do_eval=True,
     # optim="paged_adamw_8bit",
@@ -344,7 +346,6 @@ except Exception as e:
     print("=============")
     print(e)
 
-output_dir = os.path.join("./data/checkpoint", hf_model_id.split("/")[-1])
 trainer.save_model(output_dir)
 # free the memory again
 del model
