@@ -312,6 +312,19 @@ try:
     repo_id = f"{user}/{hf_model_id}"
     logger.info(f"repo_id: {repo_id}")
     card = ModelCard.load(repo_id)
+
+    if not card.text.lstrip().startswith("---"):
+        yaml_metadata = (
+            "---\n"
+            "license: apache-2.0\n"
+            "language: en\n"
+            "tags:\n"
+            "  - text-generation\n"
+            f"model_name: {hf_model_id}\n"
+            "---\n\n"
+        )
+        card.text = yaml_metadata + card.text
+
     sections = card.text.split("## ")
 
     new_sections = []
@@ -319,7 +332,7 @@ try:
         if section.lower().startswith("citations"):
             new_section = (
                 "Citations\n\n"
-                "This model was fine-tuned by **AIxBlock**.\n\n"
+                "This model was fine-tuned on **AIxBlock** platform.\n\n"
                 "It was trained using a proprietary training workflow from **AIxBlock**, "
                 "a project under the ownership of the company.\n\n"
                 "© 2025 AIxBlock. All rights reserved.\n"
