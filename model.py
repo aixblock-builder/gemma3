@@ -108,6 +108,8 @@ tokenizer_demo = None
 model_loaded_demo = False
 # Parameters for model deployment
 pipe_prediction = None
+model_load_predict = None
+_model = None
 
 
 class MyModel(AIxBlockMLBase):
@@ -573,7 +575,10 @@ class MyModel(AIxBlockMLBase):
             from huggingface_hub import login 
             hf_access_token = kwargs.get("hf_access_token", "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")
             login(token = hf_access_token)
-            
+
+            global _model
+            global model_load_predict
+
             def smart_pipeline(model_id: str, token: str, local_dir="./data/checkpoint", task="text-generation"):
                 try:
                     import os
@@ -605,7 +610,7 @@ class MyModel(AIxBlockMLBase):
                         torch_dtype=dtype,
                         device_map="auto",
                         token=token,
-                        max_new_tokens=256
+                        max_new_tokens=max_new_token
                     )
                 else:
                     print("Using CPU.")
@@ -614,12 +619,26 @@ class MyModel(AIxBlockMLBase):
                         model=model_source,
                         device_map="cpu",
                         token=token,
-                        max_new_tokens=256
+                        max_new_tokens=max_new_token
                     )
 
                 return pipe
 
-            _model = smart_pipeline(model_id, hf_access_token)
+            def unload_model():
+                global _model 
+                if _model is not None:
+                    del _model
+                    _model = None
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+
+            if model_id != model_load_predict:
+                print(f"🔁 Switching model from {model_load_predict} ➜ {model_id}")
+                unload_model()  
+                _model = smart_pipeline(model_id, hf_access_token)
+                model_load_predict = model_id
+        
             generated_text = qa_without_context(_model, prompt)
         
             print(generated_text)
